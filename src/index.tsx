@@ -2,48 +2,63 @@ import React, { MouseEventHandler } from 'react';
 import ReactDOM from 'react-dom';
 import './index.css';
 
-const Square = (props: {value: string, onClick: MouseEventHandler}) => {
+const BOARD_SIZE = 3;
+
+/**
+ * Function Component represents one single square on the board
+ * 表示 棋盘上一个格子 的 函数组件
+ *
+ * @param props
+ * @returns html Button
+ */
+const Square: React.FC<{value: string, onClick: MouseEventHandler}> = (props) => {
   return <button className="square" onClick = { props.onClick }>
           { props.value }
         </button>;
 }
 
-class Board extends React.Component<{ squares: Array<string>, onClick: Function }, { squares: Array<string>, xIsNext: boolean }> {
-  state = {
-    squares: Array<string>(9).fill(''),
-    xIsNext: true
-  };
+/**
+ * Function Component renders the game board
+ * 表示 整个游戏棋盘 的 函数组件
+ *
+ * @param props
+ * @returns html div
+ */
+const Board: React.FC<{squares: Array<string>, onClick: Function}> = (props) => {
+  // index array for rendering multiple components
+  // 用来 循环渲染多个组件 的 索引数组
+  const numbers = [0, 1, 2]
 
-  renderSquare(i: number) {
-    return <Square value={ this.props.squares[i] } onClick={ () => this.props.onClick(i) } />;
+  const renderSquare = (i: number) => {
+    return <Square value={ props.squares[i] } onClick={ () => props.onClick(i) } key={i} />
   }
 
-  render() {
-    return (
-      <div>
-        <div className="board-row">
-          {this.renderSquare(0)}
-          {this.renderSquare(1)}
-          {this.renderSquare(2)}
-        </div>
-        <div className="board-row">
-          {this.renderSquare(3)}
-          {this.renderSquare(4)}
-          {this.renderSquare(5)}
-        </div>
-        <div className="board-row">
-          {this.renderSquare(6)}
-          {this.renderSquare(7)}
-          {this.renderSquare(8)}
-        </div>
-      </div>
-    );
-  }
+  return (
+    <div>
+      {/* render a row each loop */}
+      {/* 每次循环渲染一行格子 */}
+      {numbers.map((_, row) => {
+        return (
+          <div className="board-row" key={row}>
+            {/* render one square inside a row each loop */}
+            {/* 每次循环渲染一行里的一个格子 */}
+            {numbers.map((_, col) => {
+              return renderSquare(row * BOARD_SIZE + col)
+            })}
+          </div>
+        )})}
+    </div>
+  )
 }
 
+/**
+ * Class Component represents the Game app
+ * 代表 整个游戏 的 类组件
+ */
 class Game extends React.Component<{},
   {history: {squares: Array<string>}[],step: Number ,xIsNext: boolean}> {
   // init state
+  // 初始化 组件状态
   state = {
     history: [{
       squares: Array<string>(9).fill('')
@@ -51,9 +66,19 @@ class Game extends React.Component<{},
     step: 0,
     xIsNext: true
   };
-  // handle click
+
+  /**
+   * Function to handle click events
+   * 用来处理鼠标点击的函数
+   *
+   * @param i The number of clicked square 被点击的格子的编号
+   * @returns no return
+   */
   handleClick = (i: number) => {
+    // slice the altered future to keep timeline sane
+    // 剪掉已经被覆盖的记录，保持时间线正常
     const history = this.state.history.slice(0, this.state.step + 1);
+
     const current = history[this.state.step];
     const squares = current.squares.slice();
     const xIsNext = this.state.xIsNext;
@@ -65,11 +90,15 @@ class Game extends React.Component<{},
       xIsNext: !xIsNext
     });
   };
-  //TimeJump
-  jumpTo = (step: number) => {
+  /**
+   * Function to jump back to a specified step in the history
+   * 用来 跳回指定的步数 的函数
+   * @param step the move you want to jump back
+   */
+  jumpTo = (move: number) => {
     this.setState({
-      step: step,
-      xIsNext: (step % 2 === 0)
+      step: move,
+      xIsNext: (move % 2 === 0)
     })
   }
 
@@ -77,13 +106,23 @@ class Game extends React.Component<{},
     const history = this.state.history;
     const current = history[this.state.step];
     const winner = calculateWinner(current.squares);
+    console.table(current.squares)
     const status = winner ? ('Winner is ' + winner + '!') : ('Next Player is ' + (this.state.xIsNext ? 'X': 'O'));
-    // TimeMachine
-    const moves = history.map((step, move) => {
-      const description = move? 'Go to move #' + move : 'Go to start';
-      return <li key={ move }>
-        <button onClick={() => this.jumpTo(move) }>{ description }</button>
-      </li>
+
+    // Game history
+    const moves = history.map(
+      /**
+       * Function to render time jump buttons
+       * 用来 渲染回溯按钮 的 函数
+       *
+       * @param move 步数
+       * @returns html Button
+       */
+      (_, move) => {
+        const description = move? 'Go to move #' + move : 'Go to start';
+        return <li key={ move }>
+          <button onClick={() => this.jumpTo(move) }>{ description }</button>
+        </li>
     });
     return (
       <div className="game">
@@ -99,6 +138,13 @@ class Game extends React.Component<{},
   }
 }
 
+/**
+ * Function to calculate the winner
+ * 用于 计算赢家 的 函数
+ *
+ * @param squares 当前的棋盘
+ * @returns the winner's symbol or null 赢家的棋子或者空值
+ */
 const calculateWinner = (squares: Array<string>) => {
   const lines = [
     [0, 1, 2],
