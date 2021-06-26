@@ -51,17 +51,26 @@ const Board: React.FC<{squares: Array<string>, onClick: Function}> = (props) => 
   )
 }
 
+interface GameState {
+  history: {
+    squares: Array<string>,
+    coords: number[] | null
+  }[],
+  step: number ,xIsNext: boolean
+}
+
 /**
  * Class Component represents the Game app
  * 代表 整个游戏 的 类组件
  */
 class Game extends React.Component<{},
-  {history: {squares: Array<string>}[],step: Number ,xIsNext: boolean}> {
+  GameState> {
   // init state
   // 初始化 组件状态
-  state = {
+  state: GameState = {
     history: [{
-      squares: Array<string>(9).fill('')
+      squares: Array<string>(9).fill(''),
+      coords: null
     }],
     step: 0,
     xIsNext: true
@@ -85,7 +94,7 @@ class Game extends React.Component<{},
     if (calculateWinner(squares) || squares[i]) return;
     squares[i] = xIsNext? 'X': 'O';
     this.setState({
-      history: history.concat({squares}),
+      history: history.concat({squares, coords: calculateCoordinate(i)}),
       step: history.length,
       xIsNext: !xIsNext
     });
@@ -105,6 +114,7 @@ class Game extends React.Component<{},
   render() {
     const history = this.state.history;
     const current = history[this.state.step];
+    const currentCoords = current.coords === null ? null : "Last move at (" + current.coords.join(', ') + ")";
     const winner = calculateWinner(current.squares);
     console.table(current.squares)
     const status = winner ? ('Winner is ' + winner + '!') : ('Next Player is ' + (this.state.xIsNext ? 'X': 'O'));
@@ -131,6 +141,7 @@ class Game extends React.Component<{},
         </div>
         <div className="game-info">
           <div>{ status }</div>
+          <div>{ currentCoords }</div>
           <ol>{ moves }</ol>
         </div>
       </div>
@@ -163,6 +174,24 @@ const calculateWinner = (squares: Array<string>) => {
     }
   }
   return null;
+}
+
+/**
+ * Function to calculate square coordinates by it's number
+ * 用于计算 被点击格子的坐标 的函数
+ *
+ * @param i number of square 格子的编号
+ * @returns square coordinates 格子的坐标
+ */
+const calculateCoordinate = (i: number) => {
+  const coordinateMap = new Map<number, number[]>()
+  // far upper-left corner as (1, 1)
+  // 以最左上一格为(1, 1)坐标
+  coordinateMap.set(0, [1, 1]).set(1, [1, 2]).set(2, [1, 3])
+                .set(3, [2, 1]).set(4, [2, 2]).set(5, [2, 3])
+                .set(6, [3, 1]).set(7, [3, 2]).set(8, [3, 3]);
+  let coords = coordinateMap.get(i);
+  return coords === undefined ? null : coords;
 }
 
 // ========================================
