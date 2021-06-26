@@ -58,7 +58,7 @@ const Board: React.FC<{squares: Array<string>, onClick: Function}> = (props) => 
 interface GameState {
   history: {
     squares: Array<string>,
-    coords: number[] | null
+    coords?: number[]
   }[],
   step: number ,xIsNext: boolean
 }
@@ -73,8 +73,7 @@ class Game extends React.Component<{},
   // 初始化 游戏组件状态
   state: GameState = {
     history: [{
-      squares: Array<string>(9).fill(''),
-      coords: null
+      squares: Array<string>(9).fill('')
     }],
     step: 0,
     xIsNext: true
@@ -118,10 +117,9 @@ class Game extends React.Component<{},
   render() {
     const history = this.state.history;
     const current = history[this.state.step];
-    const currentCoords = current.coords === null ? null : "Last move at (" + current.coords.join(', ') + ")";
     const winner = calculateWinner(current.squares);
-    console.table(current.squares)
-    const status = winner ? ('Winner is ' + winner + '!') : ('Next Player is ' + (this.state.xIsNext ? 'X': 'O'));
+    const nextPlayer = this.state.xIsNext ? 'X': 'O';
+    const status = winner ? ('Winner is ' + winner + '!') : ('Next Player is ' + nextPlayer);
 
     // Game history
     const moves = history.map(
@@ -132,12 +130,13 @@ class Game extends React.Component<{},
        * @param move 步数
        * @returns html Button
        */
-      (_, move) => {
-        const description = move? 'Go to move #' + move : 'Go to start';
-        return <li key={ move }>
-          <button onClick={() => this.jumpTo(move) }>{ description }</button>
-        </li>
-    });
+      (it, move) => {
+        const description = move? 'Go to move #' + move + " at (" + it.coords!.join(', ') + ")": 'Go to start';
+        return (
+          <li key={ move }>
+            <button onClick={() => this.jumpTo(move) }>{ description }</button>
+          </li>)
+      });
     return (
       <div className="game">
         <div className="game-board">
@@ -145,7 +144,6 @@ class Game extends React.Component<{},
         </div>
         <div className="game-info">
           <div>{ status }</div>
-          <div>{ currentCoords }</div>
           <ol>{ moves }</ol>
         </div>
       </div>
@@ -185,17 +183,17 @@ const calculateWinner = (squares: Array<string>) => {
  * 用于计算 被点击格子的坐标 的函数
  *
  * @param i number of square 格子的编号
- * @returns square coordinates 格子的坐标
+ * @returns `coords?` square coordinates 格子的坐标
  */
 const calculateCoordinate = (i: number) => {
   const coordinateMap = new Map<number, number[]>()
   // far upper-left corner as (1, 1)
   // 以最左上一格为(1, 1)坐标
-  coordinateMap.set(0, [1, 1]).set(1, [1, 2]).set(2, [1, 3])
-                .set(3, [2, 1]).set(4, [2, 2]).set(5, [2, 3])
-                .set(6, [3, 1]).set(7, [3, 2]).set(8, [3, 3]);
+  coordinateMap.set(0, [1, 1]).set(1, [2, 1]).set(2, [3, 1])
+                .set(3, [1, 2]).set(4, [2, 2]).set(5, [3, 2])
+                .set(6, [1, 3]).set(7, [2, 3]).set(8, [3, 3]);
   let coords = coordinateMap.get(i);
-  return coords === undefined ? null : coords;
+  return coords;
 }
 
 // ========================================
