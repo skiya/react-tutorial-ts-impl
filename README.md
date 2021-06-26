@@ -2,8 +2,9 @@
 
 ## What
 
-A TypeScript version of React's official Tic Tac Toe tutorial.
+React's official Tic Tac Toe tutorial in TypeScript fashion.
 
 ## DIY step
 
-[WIP]
+1. `npm install`
+1. `npm start` to start dev server on `localhost:3000`
