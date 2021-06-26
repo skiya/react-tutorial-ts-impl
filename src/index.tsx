@@ -51,6 +51,10 @@ const Board: React.FC<{squares: Array<string>, onClick: Function}> = (props) => 
   )
 }
 
+/**
+ * interface that represents the state of the <Game /> Component
+ * 代表游戏状态的接口
+ */
 interface GameState {
   history: {
     squares: Array<string>,
@@ -65,8 +69,8 @@ interface GameState {
  */
 class Game extends React.Component<{},
   GameState> {
-  // init state
-  // 初始化 组件状态
+  // init game state
+  // 初始化 游戏组件状态
   state: GameState = {
     history: [{
       squares: Array<string>(9).fill(''),
