@@ -17,6 +17,10 @@ const Square: React.FC<{value: string, onClick: MouseEventHandler}> = (props) =>
         </button>;
 }
 
+/**
+ * Class Component renders a single history button
+ * 代表 一个历史按钮的 类组件
+ */
 class History extends React.Component<{description: string}, {isMouseHovering: boolean}> {
   state = {
     isMouseHovering: false
