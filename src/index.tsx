@@ -17,6 +17,19 @@ const Square: React.FC<{value: string, onClick: MouseEventHandler}> = (props) =>
         </button>;
 }
 
+class History extends React.Component<{description: string}, {isMouseHovering: boolean}> {
+  state = {
+    isMouseHovering: false
+  }
+  render() {
+    return (
+      <button onMouseOver={() => { this.setState({isMouseHovering: true}) }}
+              onMouseLeave={() => { this.setState({isMouseHovering: false}) }}
+              style={{fontWeight: this.state.isMouseHovering ? "bold": "normal"}}> { this.props.description } </button>
+    )
+  }
+}
+
 /**
  * Function Component renders the game board
  * 表示 整个游戏棋盘 的 函数组件
@@ -133,9 +146,10 @@ class Game extends React.Component<{},
       (it, move) => {
         const description = move? 'Go to move #' + move + " at (" + it.coords!.join(', ') + ")": 'Go to start';
         return (
-          <li key={ move }>
-            <button onClick={() => this.jumpTo(move) }>{ description }</button>
-          </li>)
+          <li>
+            <History key={move} description={description} />
+          </li>
+        )
       });
     return (
       <div className="game">
