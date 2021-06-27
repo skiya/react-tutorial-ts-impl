@@ -27,9 +27,13 @@ class History extends React.Component<{description: string}, {isMouseHovering: b
   }
   render() {
     return (
-      <button onMouseOver={() => { this.setState({isMouseHovering: true}) }}
-              onMouseLeave={() => { this.setState({isMouseHovering: false}) }}
-              style={{fontWeight: this.state.isMouseHovering ? "bold": "normal"}}> { this.props.description } </button>
+      <li>
+        <button onMouseOver={() => { this.setState({isMouseHovering: true}) }}
+                onMouseLeave={() => { this.setState({isMouseHovering: false}) }}
+                style={{fontWeight: this.state.isMouseHovering ? "bold": "normal"}}>
+          { this.props.description }
+        </button>
+      </li>
     )
   }
 }
@@ -150,9 +154,7 @@ class Game extends React.Component<{},
       (it, move) => {
         const description = move? 'Go to move #' + move + " at (" + it.coords!.join(', ') + ")": 'Go to start';
         return (
-          <li>
-            <History key={move} description={description} />
-          </li>
+          <History key={move} description={description} />
         )
       });
     return (
